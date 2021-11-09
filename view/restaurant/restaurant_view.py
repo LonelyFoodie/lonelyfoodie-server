@@ -1,13 +1,22 @@
 from flask import request, jsonify, Blueprint
+from flask_restplus import Namespace, Resource, fields
 
 from service.restaurant_service import RestaurantService
 
+app = Blueprint('Restaurant', __name__, url_prefix='/restaurants')
+api = Namespace('Restaurant', description='Restaurant related operations')
 
-class RestaurantView:
-    app = Blueprint('restaurant', __name__, url_prefix='/restaurants')
+
+restaurant = api.model('Restaurant', {
+    'id': fields.String(required=True, description='identifier')
+})
+
+
+@api.route('/<id>')
+class Restaurant(Resource):
 
     @app.route('/', methods=['POST'])
-    def create_restaurant():
+    def post(self):
         restaurant_service = RestaurantService()
 
         new_restaurant = request.json()
@@ -18,13 +27,12 @@ class RestaurantView:
 
         return jsonify(new_restaurant)
 
-    @app.route('/', methods=['GET'])
-    def get_restaurant():
-        restaurant_id = request.args.get('id')
-
+    @api.doc('restaurant')
+    @api.marshal_with(restaurant)
+    @app.route('/<id>', methods=['GET'])
+    def get(self, id):
         restaurant_service = RestaurantService()
 
-        restaurant = restaurant_service.get_restaurant(restaurant_id)
+        restaurant = restaurant_service.get_restaurant(id)
 
         return jsonify(restaurant)
-

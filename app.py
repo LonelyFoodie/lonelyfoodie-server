@@ -1,19 +1,20 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_restplus import Api
 
 from view.restaurant import restaurant_view
 
 
 def create_app():
     app = Flask(__name__)
+    api = Api(app)
 
     CORS(app)
 
     app.config.from_pyfile("config.py")
 
-    restaurant = restaurant_view.RestaurantView()
-
-    app.register_blueprint(restaurant.app)
+    app.register_blueprint(restaurant_view.app)
+    api.add_namespace(restaurant_view.api, path='/restaurants')
 
     return app
 
